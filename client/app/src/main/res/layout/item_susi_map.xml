@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<me.himanshusoni.chatmessageview.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chatMessageView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/message_layout_margin"
+    android:layout_marginTop="@dimen/message_layout_margin"
+    app:cmv_arrowGravity="start"
+    app:cmv_arrowPosition="left"
+    app:cmv_backgroundColor="@color/susi_message_bg"
+    app:cmv_backgroundColorPressed="@color/susi_message_pressed_bg"
+    app:cmv_contentPadding="@dimen/cmv_padding"
+    app:cmv_cornerRadius="@dimen/cmv_corner_radius"
+    app:cmv_showArrow="false">
+
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="@color/md_black_1000"
+                android:textSize="@dimen/message_text_size"
+                tools:text="Hello!!"/>
+
+            <TextView
+                android:id="@+id/timestamp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom|end"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="@color/md_grey_600"
+                android:textSize="@dimen/timestamp_size"
+                tools:text="05:32" />
+
+        </LinearLayout>
+
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="250dp">
+
+
+
+            <ImageView
+                android:id="@+id/map_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:background="#aaffffff"
+                tools:src="@drawable/ic_susi" />
+
+
+            <ImageView
+                android:id="@+id/location_pointer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_location_pointer"/>
+
+
+        </FrameLayout>
+
+    </LinearLayout>
+</me.himanshusoni.chatmessageview.ChatMessageView>
