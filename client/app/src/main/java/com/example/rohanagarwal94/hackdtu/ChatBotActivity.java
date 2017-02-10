@@ -337,8 +337,8 @@ public class ChatBotActivity extends AppCompatActivity {
         };
         Log.d(TAG, "init");
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("");
-        getSupportActionBar().setIcon(R.drawable.susi);
+        getSupportActionBar().setTitle("HealthBot");
+
         nonDeliveredMessages.clear();
         RealmResults<ChatMessage> nonDelivered = realm.where(ChatMessage.class).equalTo("isDelivered", false).findAll().sort("id");
         for (ChatMessage each : nonDelivered) {
