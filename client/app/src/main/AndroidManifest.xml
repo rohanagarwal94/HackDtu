@@ -43,6 +43,10 @@
             android:name=".CancerDetectionActivity"
             android:theme="@style/AppTheme"
          />
+        <activity
+            android:name=".DiabetesActivity"
+            android:theme="@style/AppTheme"
+            />
     </application>
 
 </manifest>
