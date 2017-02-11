@@ -41,6 +41,8 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -50,6 +52,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.rohanagarwal94.hackdtu.helper.Constant;
 import com.example.rohanagarwal94.hackdtu.helper.DateTimeHelper;
@@ -57,6 +65,10 @@ import com.example.rohanagarwal94.hackdtu.helper.PrefManager;
 import com.example.rohanagarwal94.hackdtu.model.ChatMessage;
 import com.example.rohanagarwal94.hackdtu.model.Datum;
 import com.example.rohanagarwal94.hackdtu.model.SusiResponse;
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -65,9 +77,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,11 +92,9 @@ import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
+import static android.R.attr.password;
 import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
 
 public class ChatBotActivity extends AppCompatActivity {
@@ -107,6 +119,7 @@ public class ChatBotActivity extends AppCompatActivity {
     private FloatingActionButton fab_scrollToEnd;
     //	 Global Variables used for the setMessage Method
     private String answer;
+    private RequestQueue requestQueue;
     private String actionType;
     private boolean isMap, isPieChart = false;
     private boolean isHavingLink;
@@ -1042,5 +1055,75 @@ public class ChatBotActivity extends AppCompatActivity {
         public void run() {
 //            computeOtherMessage();
         }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chat_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.analyse:
+                return readChat();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private boolean readChat() {
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmResults<ChatMessage> result = realm.where(ChatMessage.class).equalTo("isMine",true).findAll();
+        String paragraph = "";
+        for(int i=0;i<result.size();i++){
+            paragraph += (result.get(i).getContent());
+        }
+        getEmotion(paragraph);
+        return true;
+    }
+    void getEmotion(String paragraph){
+        requestQueue = Volley.newRequestQueue(ChatBotActivity.this);
+        String url="https://codeslayers.herokuapp.com/getEmotion";
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("text", "A suicide note or death note is a message left behind before a person has committed suicide, or who intends to commit suicide.  It is estimated that 25–30% of suicides are accompanied by a note. According to Gelder, Mayou and Geddes (2005) one in six leaves a suicide note. The content can be a plea for absolution or blaming family and friends for life's failings. However, incidence rates may depend on ethnicity, method of suicide, and cultural differences, and may reach rates as high as 50% in certain demographics.[1] A suicide message can be a written note, an audio message, or a video.");
+//        JSONObject jsonObject=new JSONObject();
+//        try {
+//            jsonObject.put("text","A suicide note or death note is a message left behind before a person has committed suicide, or who intends to commit suicide.  It is estimated that 25–30% of suicides are accompanied by a note. According to Gelder, Mayou and Geddes (2005) one in six leaves a suicide note. The content can be a plea for absolution or blaming family and friends for life's failings. However, incidence rates may depend on ethnicity, method of suicide, and cultural differences, and may reach rates as high as 50% in certain demographics.[1] A suicide message can be a written note, an audio message, or a video.");
+//        }catch (JSONException e){
+//            //Toast.makeText(getApplicationContext(), "Json exception", Toast.LENGTH_SHORT).show();
+//        }
+        JsonObjectRequest jor = new JsonObjectRequest(url, new JSONObject(params),
+                new com.android.volley.Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                            Toast.makeText(ChatBotActivity.this, "received", Toast.LENGTH_SHORT).show();
+                            System.out.println(response.toString());
+
+                    }
+                },
+                new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"User already registered or Error in internet connection.",Toast.LENGTH_LONG).show();
+                        Log.e("Volley",error.toString());
+                    }
+                }
+        ){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<String, String>();
+//                params.put("text", "A suicide note or death note is a message left behind before a person has committed suicide, or who intends to commit suicide.  It is estimated that 25–30% of suicides are accompanied by a note. According to Gelder, Mayou and Geddes (2005) one in six leaves a suicide note. The content can be a plea for absolution or blaming family and friends for life's failings. However, incidence rates may depend on ethnicity, method of suicide, and cultural differences, and may reach rates as high as 50% in certain demographics.[1] A suicide message can be a written note, an audio message, or a video.");
+                  //  params.put("","");
+                return params;
+            }
+
+
+        };
+        requestQueue.add(jor);
+
     }
 }

@@ -1,5 +1,7 @@
 package com.example.rohanagarwal94.hackdtu.model;
 
+import java.util.ArrayList;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -15,6 +17,7 @@ public class ChatMessage extends RealmObject {
     private RealmList<Datum> datumRealmList;
     private WebLink webLinkData;
     private WebSearchModel webSearch;
+    //private String[] questions={"",""};
 
     private boolean isImage, isMine, isMap, isPieChart , isWebSearch, isDelivered, isHavingLink, isSearchResult, isDate;
 
