@@ -9,23 +9,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
+        android:hint="pregnancies"
         android:layout_gravity="center_horizontal" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText2"
+        android:hint="glucose"
         android:layout_gravity="center_horizontal" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText3"
+        android:hint="blood pressure"
         android:layout_gravity="center_horizontal" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="skin thickness"
         android:id="@+id/editText4"
         android:layout_gravity="center_horizontal" />
 
@@ -33,17 +37,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText5"
+        android:hint="insulin"
         android:layout_gravity="center_horizontal" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText6"
+        android:hint="bmi"
         android:layout_gravity="center_horizontal" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="diabetees pedigree function"
         android:id="@+id/editText7"
         android:layout_gravity="center_horizontal" />
 
@@ -51,6 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText8"
+        android:hint="age"
         android:layout_gravity="center_horizontal" />
 
     <Button

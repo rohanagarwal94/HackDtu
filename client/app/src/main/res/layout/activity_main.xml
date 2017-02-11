@@ -30,7 +30,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button3"
+        android:text="Diabetes check"
         android:id="@+id/button3"
         android:layout_below="@+id/button2"
         android:layout_centerHorizontal="true"
