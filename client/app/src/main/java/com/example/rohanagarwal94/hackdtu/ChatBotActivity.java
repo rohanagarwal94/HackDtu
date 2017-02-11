@@ -10,8 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -218,7 +216,7 @@ public class ChatBotActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_chatbot);
 
         init();
     }
@@ -546,276 +544,276 @@ public class ChatBotActivity extends AppCompatActivity {
         new computeThread().start();
     }
 
-    private synchronized void computeOtherMessage() {
-        final String query;
-        final long id;
-        String answer_call=null;
-        String google_search = null;
-        String setAlarm = null;
-        if (null != nonDeliveredMessages && !nonDeliveredMessages.isEmpty()) {
-            if (isNetworkConnected()) {
-                TimeZone tz = TimeZone.getDefault();
-                Date now = new Date();
-                int timezoneOffset = -1 * (tz.getOffset(now.getTime()) / 60000);
-                query = nonDeliveredMessages.getFirst().first;
-                id = nonDeliveredMessages.getFirst().second;
-                nonDeliveredMessages.pop();
-                String section[]=query.split(" ");
-                if(section.length==2 && section[0].equalsIgnoreCase("call")){
-                    answer_call="Calling "+section[1];
-                }
-                if(query.toLowerCase().contains("set alarm")){
-
-                    LinkedList<String> list = new LinkedList<>();
-                    Matcher matcher = Pattern.compile("\\d+").matcher(query);
-                    while (matcher.find()) {
-                        list.add(matcher.group());
-                    }
-                    array = list.toArray(new String[list.size()]);
-                    System.out.println(Arrays.toString(array));
-
-                    Log.v(TAG, "computeOtherMessage: " + Arrays.toString(array));
-
-                    setAlarm = getString(R.string.set_alarm);
-
-                    if(query.toLowerCase().contains("am"))
-                        timenow = "AM";
-                    else if(query.toLowerCase().contains("pm"))
-                        timenow = "PM";
-                    else
-                        timenow = null;
-
-
-                }
-                if(section[0].equalsIgnoreCase("@google")){
-                    int size = section.length;
-                    for (int i = 1; i < size; i++) {
-                        googlesearch_query = googlesearch_query + " " + section[i];
-                    }
-                    google_search = getString(R.string.google_search);
-                }
-                final float latitude = PrefManager.getFloat(Constant.LATITUDE, 0);
-                final float longitude = PrefManager.getFloat(Constant.LONGITUDE, 0);
-                final String geo_source = PrefManager.getString(Constant.GEO_SOURCE, "ip");
-                Log.d(TAG, clientBuilder.getSusiApi().getSusiResponse(timezoneOffset, longitude, latitude, geo_source, query).request().url().toString());
-                final String finalAnswer_call = answer_call;
-                final String finalgoogle_search = google_search;
-                final String finalSetAlarm = setAlarm;
-                clientBuilder.getSusiApi().getSusiResponse(timezoneOffset, longitude, latitude, geo_source, query).enqueue(
-                        new Callback<SusiResponse>() {
-                            @Override
-                            public void onResponse(Call<SusiResponse> call,
-                                                   Response<SusiResponse> response) {
-                                recyclerAdapter.hideDots();
-                                if (response != null && response.isSuccessful() && response.body() != null) {
-                                    final SusiResponse susiResponse = response.body();
-                                    int responseActionSize = response.body().getAnswers().get(0).getActions().size();
-                                    for (int counter = 0; counter < responseActionSize; counter++) {
-
-                                        try {
-                                            answer = susiResponse.getAnswers().get(0).getActions()
-                                                    .get(counter).getExpression();
-                                            delay = susiResponse.getAnswers().get(0).getActions()
-                                                    .get(counter).getDelay();
-
-
-                                            try {
-                                                isMap = response.body().getAnswers().get(0).getActions().get(2).getType().equals("map");
-                                                datumList = response.body().getAnswers().get(0).getData();
-                                            } catch (Exception e) {
-                                                isMap = false;
-                                            }
-                                            List<String> urlList = extractUrls(answer);
-                                            Log.d(TAG, urlList.toString());
-                                            String setMessage = answer;
-                                            voiceReply(setMessage, isMap);
-                                            isHavingLink = urlList != null;
-                                            if (urlList.size() == 0) isHavingLink = false;
-                                        } catch (IndexOutOfBoundsException | NullPointerException e) {
-                                            Log.d(TAG, e.getLocalizedMessage());
-                                            answer = getString(R.string.error_occurred_try_again);
-                                            isHavingLink = false;
-                                        }
-                                        try {
-                                            if (response.body().getAnswers().get(0).getActions().size() > 1) {
-                                                isPieChart = actionType != null && actionType.equals("piechart");
-                                                datumList = response.body().getAnswers().get(0).getData();
-                                            }
-                                        } catch (Exception e) {
-                                            Log.d(TAG, e.getLocalizedMessage());
-                                            isPieChart = false;
-                                        }
-                                        try {
-                                            isSearchResult = response.body().getAnswers().get(0).getActions().get(1).getType().equals("rss");
-                                            datumList = response.body().getAnswers().get(0).getData();
-                                        } catch (Exception e) {
-                                            isSearchResult = false;
-                                        }
-                                        try {
-                                            isWebSearch = response.body().getAnswers().get(0).getActions().get(1).getType().equals("websearch");
-                                            datumList = response.body().getAnswers().get(0).getData();
-                                        } catch (Exception e) {
-                                            isWebSearch = false;
-                                        }
-
-                                        realm.executeTransactionAsync(new Realm.Transaction() {
-                                            @Override
-                                            public void execute(Realm bgRealm) {
-                                                long prId = id;
-                                                try {
-                                                    ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
-                                                    chatMessage.setIsDelivered(true);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        });
-                                        rvChatFeed.getRecycledViewPool().clear();
-                                        recyclerAdapter.notifyItemChanged((int) id);
-
-                                        if(finalAnswer_call!=null && finalAnswer_call.contains("Calling"))
-                                        {
-                                            answer = finalAnswer_call;
-                                            isWebSearch = false;
-                                        }
-                                        if(finalgoogle_search!=null&&finalgoogle_search.contains("google"))
-                                        {
-                                            answer = finalgoogle_search;
-                                            isWebSearch = false;
-                                        }
-                                        if(finalSetAlarm !=null && finalSetAlarm.contains("Alarm")){
-                                            answer = finalSetAlarm;
-                                            isWebSearch = false;
-                                        }
-
-                                        final String setMessage = answer;
-                                        final int counterValue = counter;
-                                        actionType = response.body().getAnswers().get(0).getActions().get(counter).getType();
-                                        final Handler delayHandler = new Handler();
-                                        delayHandler.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                actionType = susiResponse.getAnswers().get(0).getActions().get(counterValue).getType();
-                                                if ("answer".equals(actionType)) {
-                                                    addNewMessage(setMessage, isMap, isHavingLink, isPieChart, isWebSearch, isSearchResult, datumList);
-                                                }
-                                                else if ("anchor".equals(actionType)) {
-                                                    String text = susiResponse.getAnswers().get(0).getActions().get(counterValue).getAnchorText();
-                                                    String link = susiResponse.getAnswers().get(0).getActions().get(counterValue).getAnchorLink();
-                                                    if (link != null) {
-                                                        addNewMessage(text.concat(": ".concat(link)), false, isHavingLink, false, false, false, datumList);
-                                                    }
-                                                    else {
-                                                        String mapDisplayName;
-                                                        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                                                        try {
-                                                            float lat = PrefManager.getFloat(Constant.LATITUDE,0);
-                                                            float lon = PrefManager.getFloat(Constant.LONGITUDE,0);
-                                                            List<Address> addresses = geocoder.getFromLocation(lat,lon,1);
-                                                            StringBuilder locationAddressBuilder = new StringBuilder();
-                                                            int addressLineSize = addresses.get(0).getMaxAddressLineIndex();
-                                                            for (int addressLineCount = 0; addressLineCount < addressLineSize - 1;addressLineCount++)
-                                                            {
-                                                                locationAddressBuilder.append(addresses.get(0).getAddressLine(addressLineCount)).append(", ");
-                                                            }
-                                                            locationAddressBuilder.append(addresses.get(0).getAddressLine(addressLineSize-1));
-                                                            mapDisplayName =  "Address: ".concat(locationAddressBuilder.toString());
-                                                            addNewMessage(mapDisplayName, false, false, false, false, false, datumList);
-                                                        }
-                                                        catch (Exception e){
-                                                            e.printStackTrace();
-                                                        }
-                                                    }
-                                                }
-//                                                else if ("map".equals(actionType)) {
+//    private synchronized void computeOtherMessage() {
+//        final String query;
+//        final long id;
+//        String answer_call=null;
+//        String google_search = null;
+//        String setAlarm = null;
+//        if (null != nonDeliveredMessages && !nonDeliveredMessages.isEmpty()) {
+//            if (isNetworkConnected()) {
+//                TimeZone tz = TimeZone.getDefault();
+//                Date now = new Date();
+//                int timezoneOffset = -1 * (tz.getOffset(now.getTime()) / 60000);
+//                query = nonDeliveredMessages.getFirst().first;
+//                id = nonDeliveredMessages.getFirst().second;
+//                nonDeliveredMessages.pop();
+//                String section[]=query.split(" ");
+//                if(section.length==2 && section[0].equalsIgnoreCase("call")){
+//                    answer_call="Calling "+section[1];
+//                }
+//                if(query.toLowerCase().contains("set alarm")){
 //
-//                                               }
-//                                                else if ("websearch".equals(actionType)) {
-                                                //String query = susiResponse.getAnswers().get(0).getActions().get(counterValue).getQuery();
-                                                //TODO: Implement web search result.
+//                    LinkedList<String> list = new LinkedList<>();
+//                    Matcher matcher = Pattern.compile("\\d+").matcher(query);
+//                    while (matcher.find()) {
+//                        list.add(matcher.group());
+//                    }
+//                    array = list.toArray(new String[list.size()]);
+//                    System.out.println(Arrays.toString(array));
+//
+//                    Log.v(TAG, "computeOtherMessage: " + Arrays.toString(array));
+//
+//                    setAlarm = getString(R.string.set_alarm);
+//
+//                    if(query.toLowerCase().contains("am"))
+//                        timenow = "AM";
+//                    else if(query.toLowerCase().contains("pm"))
+//                        timenow = "PM";
+//                    else
+//                        timenow = null;
+//
+//
+//                }
+//                if(section[0].equalsIgnoreCase("@google")){
+//                    int size = section.length;
+//                    for (int i = 1; i < size; i++) {
+//                        googlesearch_query = googlesearch_query + " " + section[i];
+//                    }
+//                    google_search = getString(R.string.google_search);
+//                }
+//                final float latitude = PrefManager.getFloat(Constant.LATITUDE, 0);
+//                final float longitude = PrefManager.getFloat(Constant.LONGITUDE, 0);
+//                final String geo_source = PrefManager.getString(Constant.GEO_SOURCE, "ip");
+//                Log.d(TAG, clientBuilder.getSusiApi().getSusiResponse(timezoneOffset, longitude, latitude, geo_source, query).request().url().toString());
+//                final String finalAnswer_call = answer_call;
+//                final String finalgoogle_search = google_search;
+//                final String finalSetAlarm = setAlarm;
+//                clientBuilder.getSusiApi().getSusiResponse(timezoneOffset, longitude, latitude, geo_source, query).enqueue(
+//                        new Callback<SusiResponse>() {
+//                            @Override
+//                            public void onResponse(Call<SusiResponse> call,
+//                                                   Response<SusiResponse> response) {
+//                                recyclerAdapter.hideDots();
+//                                if (response != null && response.isSuccessful() && response.body() != null) {
+//                                    final SusiResponse susiResponse = response.body();
+//                                    int responseActionSize = response.body().getAnswers().get(0).getActions().size();
+//                                    for (int counter = 0; counter < responseActionSize; counter++) {
+//
+//                                        try {
+//                                            answer = susiResponse.getAnswers().get(0).getActions()
+//                                                    .get(counter).getExpression();
+//                                            delay = susiResponse.getAnswers().get(0).getActions()
+//                                                    .get(counter).getDelay();
+//
+//
+//                                            try {
+//                                                isMap = response.body().getAnswers().get(0).getActions().get(2).getType().equals("map");
+//                                                datumList = response.body().getAnswers().get(0).getData();
+//                                            } catch (Exception e) {
+//                                                isMap = false;
+//                                            }
+//                                            List<String> urlList = extractUrls(answer);
+//                                            Log.d(TAG, urlList.toString());
+//                                            String setMessage = answer;
+//                                            voiceReply(setMessage, isMap);
+//                                            isHavingLink = urlList != null;
+//                                            if (urlList.size() == 0) isHavingLink = false;
+//                                        } catch (IndexOutOfBoundsException | NullPointerException e) {
+//                                            Log.d(TAG, e.getLocalizedMessage());
+//                                            answer = getString(R.string.error_occurred_try_again);
+//                                            isHavingLink = false;
+//                                        }
+//                                        try {
+//                                            if (response.body().getAnswers().get(0).getActions().size() > 1) {
+//                                                isPieChart = actionType != null && actionType.equals("piechart");
+//                                                datumList = response.body().getAnswers().get(0).getData();
+//                                            }
+//                                        } catch (Exception e) {
+//                                            Log.d(TAG, e.getLocalizedMessage());
+//                                            isPieChart = false;
+//                                        }
+//                                        try {
+//                                            isSearchResult = response.body().getAnswers().get(0).getActions().get(1).getType().equals("rss");
+//                                            datumList = response.body().getAnswers().get(0).getData();
+//                                        } catch (Exception e) {
+//                                            isSearchResult = false;
+//                                        }
+//                                        try {
+//                                            isWebSearch = response.body().getAnswers().get(0).getActions().get(1).getType().equals("websearch");
+//                                            datumList = response.body().getAnswers().get(0).getData();
+//                                        } catch (Exception e) {
+//                                            isWebSearch = false;
+//                                        }
+//
+//                                        realm.executeTransactionAsync(new Realm.Transaction() {
+//                                            @Override
+//                                            public void execute(Realm bgRealm) {
+//                                                long prId = id;
+//                                                try {
+//                                                    ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
+//                                                    chatMessage.setIsDelivered(true);
+//                                                } catch (Exception e) {
+//                                                    e.printStackTrace();
 //                                                }
-                                            }
-                                        }, delay);
-
-                                    }
-
-                                } else {
-                                    if (!isNetworkConnected()) {
-                                        recyclerAdapter.hideDots();
-                                        nonDeliveredMessages.addFirst(new Pair(query, id));
-                                        Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                                                getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
-                                        snackbar.show();
-                                    } else {
-                                        realm.executeTransactionAsync(new Realm.Transaction() {
-                                            @Override
-                                            public void execute(Realm bgRealm) {
-                                                long prId = id;
-                                                try {
-                                                    ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
-                                                    chatMessage.setIsDelivered(true);
-                                                } catch (Exception e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        });
-                                        rvChatFeed.getRecycledViewPool().clear();
-                                        recyclerAdapter.notifyItemChanged((int) id);
-                                        addNewMessage(getString(R.string.error_invalid_token), false, false, false, false, false, null);
-                                    }
-                                    rvChatFeed.getRecycledViewPool().clear();
-                                    recyclerAdapter.notifyItemChanged((int) id);
-                                    addNewMessage(getString(R.string.error_invalid_token), false, false, false, false, false, null);
-                                }
-
-
-                                if (isNetworkConnected())
-                                    computeOtherMessage();
-                            }
-
-                            @Override
-                            public void onFailure(Call<SusiResponse> call, Throwable t) {
-                                if (t.getLocalizedMessage() != null) {
-                                    Log.d(TAG, t.getLocalizedMessage());
-                                } else {
-                                    Log.d(TAG, "An error occurred", t);
-                                }
-                                recyclerAdapter.hideDots();
-
-                                if (!isNetworkConnected()) {
-                                    recyclerAdapter.hideDots();
-                                    nonDeliveredMessages.addFirst(new Pair(query, id));
-                                    Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                                            getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
-                                    snackbar.show();
-                                } else {
-                                    realm.executeTransactionAsync(new Realm.Transaction() {
-                                        @Override
-                                        public void execute(Realm bgRealm) {
-                                            long prId = id;
-                                            try {
-                                                ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
-                                                chatMessage.setIsDelivered(true);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                    rvChatFeed.getRecycledViewPool().clear();
-                                    recyclerAdapter.notifyItemChanged((int) id);
-                                    addNewMessage(getString(R.string.error_internet_connectivity), false, false, false, false, false, null);
-                                }
-                                computeOtherMessage();
-                            }
-                        });
-            } else {
-                recyclerAdapter.hideDots();
-                Snackbar snackbar = Snackbar.make(coordinatorLayout,
-                        getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
-                snackbar.show();
-            }
-        }
-    }
+//                                            }
+//                                        });
+//                                        rvChatFeed.getRecycledViewPool().clear();
+//                                        recyclerAdapter.notifyItemChanged((int) id);
+//
+//                                        if(finalAnswer_call!=null && finalAnswer_call.contains("Calling"))
+//                                        {
+//                                            answer = finalAnswer_call;
+//                                            isWebSearch = false;
+//                                        }
+//                                        if(finalgoogle_search!=null&&finalgoogle_search.contains("google"))
+//                                        {
+//                                            answer = finalgoogle_search;
+//                                            isWebSearch = false;
+//                                        }
+//                                        if(finalSetAlarm !=null && finalSetAlarm.contains("Alarm")){
+//                                            answer = finalSetAlarm;
+//                                            isWebSearch = false;
+//                                        }
+//
+//                                        final String setMessage = answer;
+//                                        final int counterValue = counter;
+//                                        actionType = response.body().getAnswers().get(0).getActions().get(counter).getType();
+//                                        final Handler delayHandler = new Handler();
+//                                        delayHandler.postDelayed(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                actionType = susiResponse.getAnswers().get(0).getActions().get(counterValue).getType();
+//                                                if ("answer".equals(actionType)) {
+//                                                    addNewMessage(setMessage, isMap, isHavingLink, isPieChart, isWebSearch, isSearchResult, datumList);
+//                                                }
+//                                                else if ("anchor".equals(actionType)) {
+//                                                    String text = susiResponse.getAnswers().get(0).getActions().get(counterValue).getAnchorText();
+//                                                    String link = susiResponse.getAnswers().get(0).getActions().get(counterValue).getAnchorLink();
+//                                                    if (link != null) {
+//                                                        addNewMessage(text.concat(": ".concat(link)), false, isHavingLink, false, false, false, datumList);
+//                                                    }
+//                                                    else {
+//                                                        String mapDisplayName;
+//                                                        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+//                                                        try {
+//                                                            float lat = PrefManager.getFloat(Constant.LATITUDE,0);
+//                                                            float lon = PrefManager.getFloat(Constant.LONGITUDE,0);
+//                                                            List<Address> addresses = geocoder.getFromLocation(lat,lon,1);
+//                                                            StringBuilder locationAddressBuilder = new StringBuilder();
+//                                                            int addressLineSize = addresses.get(0).getMaxAddressLineIndex();
+//                                                            for (int addressLineCount = 0; addressLineCount < addressLineSize - 1;addressLineCount++)
+//                                                            {
+//                                                                locationAddressBuilder.append(addresses.get(0).getAddressLine(addressLineCount)).append(", ");
+//                                                            }
+//                                                            locationAddressBuilder.append(addresses.get(0).getAddressLine(addressLineSize-1));
+//                                                            mapDisplayName =  "Address: ".concat(locationAddressBuilder.toString());
+//                                                            addNewMessage(mapDisplayName, false, false, false, false, false, datumList);
+//                                                        }
+//                                                        catch (Exception e){
+//                                                            e.printStackTrace();
+//                                                        }
+//                                                    }
+//                                                }
+////                                                else if ("map".equals(actionType)) {
+////
+////                                               }
+////                                                else if ("websearch".equals(actionType)) {
+//                                                //String query = susiResponse.getAnswers().get(0).getActions().get(counterValue).getQuery();
+//                                                //TODO: Implement web search result.
+////                                                }
+//                                            }
+//                                        }, delay);
+//
+//                                    }
+//
+//                                } else {
+//                                    if (!isNetworkConnected()) {
+//                                        recyclerAdapter.hideDots();
+//                                        nonDeliveredMessages.addFirst(new Pair(query, id));
+//                                        Snackbar snackbar = Snackbar.make(coordinatorLayout,
+//                                                getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
+//                                        snackbar.show();
+//                                    } else {
+//                                        realm.executeTransactionAsync(new Realm.Transaction() {
+//                                            @Override
+//                                            public void execute(Realm bgRealm) {
+//                                                long prId = id;
+//                                                try {
+//                                                    ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
+//                                                    chatMessage.setIsDelivered(true);
+//                                                } catch (Exception e) {
+//                                                    e.printStackTrace();
+//                                                }
+//                                            }
+//                                        });
+//                                        rvChatFeed.getRecycledViewPool().clear();
+//                                        recyclerAdapter.notifyItemChanged((int) id);
+//                                        addNewMessage(getString(R.string.error_invalid_token), false, false, false, false, false, null);
+//                                    }
+//                                    rvChatFeed.getRecycledViewPool().clear();
+//                                    recyclerAdapter.notifyItemChanged((int) id);
+//                                    addNewMessage(getString(R.string.error_invalid_token), false, false, false, false, false, null);
+//                                }
+//
+//
+//                                if (isNetworkConnected())
+//                                    computeOtherMessage();
+//                            }
+//
+//                            @Override
+//                            public void onFailure(Call<SusiResponse> call, Throwable t) {
+//                                if (t.getLocalizedMessage() != null) {
+//                                    Log.d(TAG, t.getLocalizedMessage());
+//                                } else {
+//                                    Log.d(TAG, "An error occurred", t);
+//                                }
+//                                recyclerAdapter.hideDots();
+//
+//                                if (!isNetworkConnected()) {
+//                                    recyclerAdapter.hideDots();
+//                                    nonDeliveredMessages.addFirst(new Pair(query, id));
+//                                    Snackbar snackbar = Snackbar.make(coordinatorLayout,
+//                                            getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
+//                                    snackbar.show();
+//                                } else {
+//                                    realm.executeTransactionAsync(new Realm.Transaction() {
+//                                        @Override
+//                                        public void execute(Realm bgRealm) {
+//                                            long prId = id;
+//                                            try {
+//                                                ChatMessage chatMessage = bgRealm.where(ChatMessage.class).equalTo("id", prId).findFirst();
+//                                                chatMessage.setIsDelivered(true);
+//                                            } catch (Exception e) {
+//                                                e.printStackTrace();
+//                                            }
+//                                        }
+//                                    });
+//                                    rvChatFeed.getRecycledViewPool().clear();
+//                                    recyclerAdapter.notifyItemChanged((int) id);
+//                                    addNewMessage(getString(R.string.error_internet_connectivity), false, false, false, false, false, null);
+//                                }
+//                                computeOtherMessage();
+//                            }
+//                        });
+//            } else {
+//                recyclerAdapter.hideDots();
+//                Snackbar snackbar = Snackbar.make(coordinatorLayout,
+//                        getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
+//                snackbar.show();
+//            }
+//        }
+//    }
 
     private void addNewMessage(String answer, boolean isMap, boolean isHavingLink, boolean isPieChart, boolean isWebSearch, boolean isSearchReult, List<Datum> datumList) {
         Number temp = realm.where(ChatMessage.class).max(getString(R.string.id));
@@ -1042,7 +1040,7 @@ public class ChatBotActivity extends AppCompatActivity {
 
     private class computeThread extends Thread {
         public void run() {
-            computeOtherMessage();
+//            computeOtherMessage();
         }
     }
 }
