@@ -6,3 +6,9 @@
 .DS_Store
 /build
 /captures
+.idea/libraries/customtabs_24_2_1.xml
+.idea/libraries/design_24_2_1.xml
+build/generated/mockable-android-24.jar
+build/
+build.gradle
+local.properties
