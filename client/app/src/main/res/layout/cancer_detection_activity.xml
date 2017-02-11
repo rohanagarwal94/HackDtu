@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <Button
+        android:id="@+id/btn_take_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take Image"/>
+
+    <Button
+        android:id="@+id/btn_upload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Detect Cancer"/>
+
+    <ImageView
+        android:id="@+id/img_upload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</ScrollView>
+</LinearLayout>

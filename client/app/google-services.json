@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "452697184150",
+    "firebase_url": "https://healthbot-e0d1e.firebaseio.com",
+    "project_id": "healthbot-e0d1e",
+    "storage_bucket": "healthbot-e0d1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452697184150:android:2c0c3546b9660e14",
+        "android_client_info": {
+          "package_name": "com.example.rohanagarwal94.hackdtu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "452697184150-hba664vtijhrnk7efsbbsas7vm0223h1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rohanagarwal94.hackdtu",
+            "certificate_hash": "7EE2AFBE79418583F01FBCBFFC430991164B9F49"
+          }
+        },
+        {
+          "client_id": "452697184150-oma123ee9kef57bdilc10opqc5339o38.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABDjHb1dNqm6zkN7j4oxNPNDwq_AMoMr0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "452697184150-oma123ee9kef57bdilc10opqc5339o38.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
