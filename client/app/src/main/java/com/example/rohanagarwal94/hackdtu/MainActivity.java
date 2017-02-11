@@ -8,7 +8,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button b1,b2,b3;
+    Button b1,b3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         b1 = (Button)findViewById(R.id.button);
-        b2 = (Button)findViewById(R.id.button2);
         b3 = (Button)findViewById(R.id.button3);
 
         b1.setOnClickListener(new View.OnClickListener() {
@@ -27,13 +26,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i =new Intent(MainActivity.this, CancerDetectionActivity.class);
-                startActivity(i);
-            }
-        });
 
         b3.setOnClickListener(new View.OnClickListener() {
             @Override

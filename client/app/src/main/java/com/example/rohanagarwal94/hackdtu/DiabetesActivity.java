@@ -61,14 +61,13 @@ public class DiabetesActivity extends AppCompatActivity {
         JSONObject jsonObject=new JSONObject();
         try {
             jsonObject.put("1",e1.getText().toString());
-            jsonObject.put("2",e1.getText().toString());
-            jsonObject.put("3",e1.getText().toString());
-            jsonObject.put("4",e1.getText().toString());
-            jsonObject.put("5",e1.getText().toString());
-            jsonObject.put("6",e1.getText().toString());
-            jsonObject.put("7",e1.getText().toString());
-            jsonObject.put("8",e1.getText().toString());
-
+            jsonObject.put("2",e2.getText().toString());
+            jsonObject.put("3",e3.getText().toString());
+            jsonObject.put("4",e4.getText().toString());
+            jsonObject.put("5",e5.getText().toString());
+            jsonObject.put("6",e6.getText().toString());
+            jsonObject.put("7",e7.getText().toString());
+            jsonObject.put("8",e8.getText().toString());
 
         }catch (JSONException e){
             //Toast.makeText(getApplicationContext(), "Json exception", Toast.LENGTH_SHORT).show();
