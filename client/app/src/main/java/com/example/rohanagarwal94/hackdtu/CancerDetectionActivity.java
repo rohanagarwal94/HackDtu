@@ -7,11 +7,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,6 +21,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.firebase.client.Firebase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -36,8 +46,11 @@ public class CancerDetectionActivity extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private int points = 0;
     private Uri fileUri;
+    private Firebase mRef;
+    FirebaseStorage storage;
     private ProgressDialog progress;
     Bitmap image = null;
+    StorageReference storageRef;
     private int _xDelta;
     private int _yDelta;
     private ViewGroup mRrootLayout;
@@ -62,6 +75,12 @@ public class CancerDetectionActivity extends AppCompatActivity {
     void openCameraImages() {
         CaptureImageCamera();
     }
+
+    @OnClick(R.id.upload)
+    void uploadToFireBase() {
+        uploadFile();
+    }
+
 
     private void shareDrawImage() throws IOException {
         imageContLayout.setDrawingCacheEnabled(true);
@@ -160,9 +179,11 @@ public class CancerDetectionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cancer_detection_activity);
         ButterKnife.bind(this);
+        storage = FirebaseStorage.getInstance();
         verifyStoragePermissions(this);
         mRrootLayout = (ViewGroup) findViewById(R.id.imageContLayout);
         imgContainer=(ImageView)findViewById(R.id.imgContainer);
+        storageRef = storage.getReferenceFromUrl("gs://healthbot-e0d1e.appspot.com");
 
     }
 
@@ -186,15 +207,14 @@ public class CancerDetectionActivity extends AppCompatActivity {
     }
 
     private void uploadFile() {
-        //if there is a file to upload
         if (fileUri != null) {
             //displaying a progress dialog while upload is going on
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading");
             progressDialog.show();
 
-            StorageReference riversRef = storageReference.child("images/pic.jpg");
-            riversRef.putFile(filePath)
+            StorageReference riversRef = storageRef.child(fileUri.getLastPathSegment());
+            riversRef.putFile(fileUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -229,9 +249,7 @@ public class CancerDetectionActivity extends AppCompatActivity {
                     });
         }
         //if there is not any file
-        else {
-            //you can display an error toast
-        }
+
     }
 
 }
