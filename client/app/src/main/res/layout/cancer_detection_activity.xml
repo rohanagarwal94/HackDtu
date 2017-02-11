@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-<ScrollView
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <Button
-        android:id="@+id/btn_take_pic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Take Image"/>
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    >
 
-    <Button
-        android:id="@+id/btn_upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Detect Cancer"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="355dp"
+        android:orientation="vertical"
+        android:id="@+id/imageContLayout">
 
-    <ImageView
-        android:id="@+id/img_upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</ScrollView>
-</LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/imgContainer"
+            android:src="@mipmap/ic_launcher" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:gravity="center_horizontal">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/gotoCamera"
+            android:background="@drawable/camera" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/gotoGallery"
+            android:layout_gravity="center_vertical|right"
+            android:background="@drawable/gallery" />
+
+    </LinearLayout>
+
+</FrameLayout>
