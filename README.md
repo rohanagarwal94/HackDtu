@@ -1,6 +1,6 @@
 # HackDtu
 
-## This Application has 3 functionalitites :
+## This Application has 4 functionalities :
 1. HealthBot which analyses your mental state using IBM-Watson APIs.
 2. Diabetes detection based on Features : Blood Pressure, Skin Thinckness, Insulin, BMI, Age
 3. Cancer Detection based on Moles Using Machine Learning SVM Classifier.
